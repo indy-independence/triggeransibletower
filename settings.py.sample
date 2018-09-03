@@ -1,0 +1,4 @@
+tower_api_url = 'https://localhost:7443'
+tower_verify_ssl = False
+tower_username = 'admin'
+tower_password = 'password'
