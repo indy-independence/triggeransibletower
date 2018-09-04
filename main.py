@@ -25,7 +25,7 @@ def tower_authenticate(username=settings.tower_username, password=settings.tower
         print r.text
         raise Exception
 
-def launch_job(jobid, token):
+def launch_job(jobid, token, extra_vars=None):
     url = '{}/api/v2/job_templates/{}/launch/'.format(
         settings.tower_api_url,
         jobid
@@ -34,7 +34,13 @@ def launch_job(jobid, token):
         'Content-Type': 'application/json',
         'Authorization':  'Token {}'.format(token['token']),
     }
-    r = requests.post(url, headers=headers, verify=settings.tower_verify_ssl)
+    if extra_vars:
+        data = {
+            'extra_vars': extra_vars
+        }
+    else:
+        data = None
+    r = requests.post(url, headers=headers, json=data, verify=settings.tower_verify_ssl)
     if r.status_code == 201:
         pprint.pprint(r.json())
     else:
@@ -44,5 +50,14 @@ def launch_job(jobid, token):
 
 if __name__ == "__main__":
     token = tower_authenticate()
-    launch_job(7, token)
+    launch_job(7, token, extra_vars={
+        'interface': 'GigabitEthernet0/0/0/1',
+        'description': 'ansibletowertest',
+        'ipaddress': '172.16.0.1 255.255.255.0',
+    })
+    print "Press any key to deconfigure interface again"
+    raw_input()
+    launch_job(10, token, extra_vars={
+        'interface': 'GigabitEthernet0/0/0/1',
+    })
 
